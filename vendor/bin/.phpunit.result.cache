@@ -1,0 +1,1 @@
+{"version":1,"defects":{"LoginTest::testLoginSuccess":4,"LoginTest::testLoginFailure":4,"RegisterTest::testRegisterSuccess":4,"RegisterTest::testRegisterDuplicateEmail":4},"times":{"LoginTest::testLoginSuccess":0.07,"LoginTest::testLoginFailure":0.002,"RegisterTest::testRegisterSuccess":0.002,"RegisterTest::testRegisterDuplicateEmail":0.009}}
