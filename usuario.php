@@ -104,6 +104,9 @@ $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <li class="nav-item active">
                     <a class="nav-link" href="usuario.php">Usuários</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="relatorio.php">Relatório</a>
+                </li>
             </ul>
         </div>
     </nav>

@@ -10,26 +10,35 @@ if (!isset($_SESSION['usuario_tipo']) || !in_array($_SESSION['usuario_tipo'], ['
 
 // Filtrar ocorrências
 $filterStatus = $_GET['status'] ?? '';
-$sql = "SELECT * FROM ocorrencia";
+$filterData = $_GET['data'] ?? '';
+
+$filterStatus = $_GET['status'] ?? '';
+$filterData = $_GET['data'] ?? '';
+
+$sql = "SELECT * FROM ocorrencia WHERE 1=1";
 if ($filterStatus) {
-    $sql .= " WHERE status = :status";
+    $sql .= " AND status = :status";
 }
+
+if ($filterData) {
+    $sql .= " AND DATEDIFF(NOW(), data) ";
+
+    // Condições baseadas no intervalo de dias selecionado
+    if ($filterData === '0-10') {
+        $sql .= "BETWEEN 0 AND 10";
+    } elseif ($filterData === '11-20') {
+        $sql .= "BETWEEN 11 AND 20";
+    } elseif ($filterData === '21-30') {
+        $sql .= "BETWEEN 21 AND 30";
+    } elseif ($filterData === '30+') {
+        $sql .= "> 30";
+    }
+}
+
 $stmt = $pdo->prepare($sql);
 
 if ($filterStatus) {
     $stmt->bindParam(':status', $filterStatus);
-}
-
-
-$filterData = $_GET['data'] ?? '';
-$sql = "SELECT * FROM ocorrencia";
-if ($filterData){
-    $sql .= "WHERE data = :data";
-}
-$stmt = $pdo->prepare($sql);
-
-if ($filterData){
-    $stmt->bindParam(':data', $filterData);
 }
 $stmt->execute();
 $ocorrencias = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -80,12 +89,11 @@ $statusCounts = $stmtCount->fetchAll(PDO::FETCH_ASSOC);
     <div class="container mt-5">
         <h2>Relatório de Ocorrências</h2>
         
-        <!-- Botões de Download -->
+        <!-- Botão de Download -->
         <div class="mb-3">
             <a href="export_pdf.php?status=<?= $filterStatus ?>" class="btn btn-danger">Baixar PDF</a>
-            <a href="export_excel.php?status=<?= $filterStatus ?>" class="btn btn-success">Baixar Excel</a>
         </div>
-        <!-- Filtro de Status -->
+        <!-- Filtro do relaatório (status e data) -->
         <form method="GET" class="form-inline mb-4">
             <label for="status" class="mr-2">Filtrar por Status:</label>
             <select name="status" class="form-control mr-2" id="status">
@@ -94,19 +102,17 @@ $statusCounts = $stmtCount->fetchAll(PDO::FETCH_ASSOC);
                 <option value="Em Andamento" <?= $filterStatus === 'Em Andamento' ? 'selected' : '' ?>>Em Andamento</option>
                 <option value="Finalizada" <?= $filterStatus === 'Finalizada' ? 'selected' : '' ?>>Finalizada</option>
             </select>
-            <button type="submit" class="btn btn-primary">Aplicar Filtro</button>
-        </form>
-        
-        <!-- Filtro de Data -->
-        <form method="GET" class="form-inline mb-4">
-            <label for="data" class="mr-2">Filtrar por Período:</label>
+
+            <label for="data" class="mr-2">Filtrar por Data:</label>
             <select name="data" class="form-control mr-2" id="data">
                 <option value="">Todos</option>
-                <option value="5" <?= $filterStatus === 'Registrada' ? 'selected' : '' ?>>Registrada</option>
-                <option value="Em Andamento" <?= $filterStatus === 'Em Andamento' ? 'selected' : '' ?>>Em Andamento</option>
-                <option value="Finalizada" <?= $filterStatus === 'Finalizada' ? 'selected' : '' ?>>Finalizada</option>
+                <option value="0-10" <?= $filterData === '0-10' ? 'selected' : '' ?>>0 a 10 dias</option>
+                <option value="11-20" <?= $filterData === '11-20' ? 'selected' : '' ?>>11 a 20 dias</option>
+                <option value="21-30" <?= $filterData === '21-30' ? 'selected' : '' ?>>21 a 30 dias</option>
+                <option value="30+" <?= $filterData === '30+' ? 'selected' : '' ?>>30 dias ou mais</option>
             </select>
-            <button type="submit" class="btn btn-primary">Aplicar Filtro</button>
+
+            <button type="submit" class="btn btn-primary">Aplicar Filtros</button>
         </form>
 
         <!-- Resumo das Ocorrências -->
